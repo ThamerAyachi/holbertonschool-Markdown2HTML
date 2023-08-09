@@ -5,6 +5,19 @@ import os
 # import markdown
 
 def convert_markdown_to_html(markdown_filename, output_filename):
+    """
+    Converts Markdown content from the specified file to HTML and writes it to the output file.
+
+    Args:
+        markdown_filename (str): Path to the Markdown input file.
+        output_filename (str): Path to the HTML output file.
+
+    Raises:
+        FileNotFoundError: If the specified Markdown file doesn't exist.
+
+    Returns:
+        None
+    """
     try:
         with open(markdown_filename, 'r', encoding='utf-8') as markdown_file:
             markdown_text = markdown_file.read()
