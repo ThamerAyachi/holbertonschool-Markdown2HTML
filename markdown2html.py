@@ -6,6 +6,40 @@ import sys
 import os
 import re
 
+def process_paragraphs(html_text):
+    """
+    Process Markdown paragraphs and generate HTML paragraphs.
+
+    Args:
+        html_text (str): HTML content with lists converted.
+
+    Returns:
+        str: HTML content with paragraphs converted.
+    """
+    pattern = r'^(?!\s*(?:[-*]|\d+\.)\s).*$'
+    p_open = '<p>'
+    p_close = '</p>'
+    
+    inside_p = False
+    new_lines = []
+
+    for line in html_text.splitlines():
+        if re.match(pattern, line):
+            if not inside_p:
+                new_lines.append(p_open)
+                inside_p = True
+            new_lines.append(line)
+        else:
+            if inside_p:
+                new_lines.append(p_close)
+                inside_p = False
+            new_lines.append(line)
+
+    if inside_p:
+        new_lines.append(p_close)
+
+    return '\n'.join(new_lines)
+
 def process_lists(html_text):
     """
     Process Markdown lists (unordered and ordered) and generate HTML lists.
@@ -149,6 +183,8 @@ def convert_markdown_to_html(markdown_filename, output_filename):
             html_text = process_unordered_lists(html_text)
 
             html_text = process_lists(html_text)
+
+            html_text = process_paragraphs(html_text)
 
             with open(output_filename, 'w', encoding='utf-8') as html_file:
                 html_file.write(html_text)
