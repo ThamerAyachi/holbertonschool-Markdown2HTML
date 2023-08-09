@@ -4,7 +4,26 @@ This is Document
 """
 import sys
 import os
-# import markdown
+import re
+
+def process_headings(markdown_text):
+    """
+    Process Markdown headings and generate HTML headings.
+
+    Args:
+        markdown_text (str): Markdown content to process.
+
+    Returns:
+        str: HTML content with headings converted.
+    """
+    def heading_repl(match):
+        level = len(match.group(1))
+        return f'<h{level}>{match.group(2)}</h{level}>'
+
+    pattern = r'^(#{1,6}) (.+)$'
+    html_text = re.sub(pattern, heading_repl, markdown_text, flags=re.MULTILINE)
+    
+    return html_text
 
 def convert_markdown_to_html(markdown_filename, output_filename):
     """
@@ -23,10 +42,10 @@ def convert_markdown_to_html(markdown_filename, output_filename):
     try:
         with open(markdown_filename, 'r', encoding='utf-8') as markdown_file:
             markdown_text = markdown_file.read()
-            # html_text = markdown.markdown(markdown_text)
+            html_text = process_headings(markdown_text)
 
             with open(output_filename, 'w', encoding='utf-8') as html_file:
-                html_file.write(markdown_text)
+                html_file.write(html_text)
     except FileNotFoundError:
         print(f"Missing {markdown_filename}", file=sys.stderr)
         sys.exit(1)
