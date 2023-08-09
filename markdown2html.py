@@ -6,6 +6,69 @@ import sys
 import os
 import re
 
+def process_lists(html_text):
+    """
+    Process Markdown lists (unordered and ordered) and generate HTML lists.
+
+    Args:
+        html_text (str): HTML content with headings converted.
+
+    Returns:
+        str: HTML content with lists converted.
+    """
+    ul_pattern = r'^(\s*-\s.+$)'
+    ol_pattern = r'^(\s*\*\s.+$)'
+    ul_open = '<ul>'
+    ul_close = '</ul>'
+    ol_open = '<ol>'
+    ol_close = '</ol>'
+    li_open = '<li>'
+    li_close = '</li>'
+    
+    inside_ul = False
+    inside_ol = False
+    new_lines = []
+
+    for line in html_text.splitlines():
+        match_ul = re.match(ul_pattern, line)
+        match_ol = re.match(ol_pattern, line)
+        
+        if match_ul:
+            if inside_ol:
+                new_lines.append(ol_close)
+                inside_ol = False
+            if not inside_ul:
+                new_lines.append(ul_open)
+                inside_ul = True
+
+            list_item = li_open + line[2:] + li_close
+            new_lines.append(list_item)
+        elif match_ol:
+            if inside_ul:
+                new_lines.append(ul_close)
+                inside_ul = False
+            if not inside_ol:
+                new_lines.append(ol_open)
+                inside_ol = True
+
+            list_item = li_open + line[2:] + li_close
+            new_lines.append(list_item)
+        else:
+            if inside_ul:
+                new_lines.append(ul_close)
+                inside_ul = False
+            if inside_ol:
+                new_lines.append(ol_close)
+                inside_ol = False
+            new_lines.append(line)
+
+    if inside_ul:
+        new_lines.append(ul_close)
+    if inside_ol:
+        new_lines.append(ol_close)
+
+    return '\n'.join(new_lines)
+
 def process_unordered_lists(html_text):
     """
     Process Markdown unordered lists and generate HTML unordered lists.
@@ -84,6 +147,8 @@ def convert_markdown_to_html(markdown_filename, output_filename):
             html_text = process_headings(markdown_text)
 
             html_text = process_unordered_lists(html_text)
+
+            html_text = process_lists(html_text)
 
             with open(output_filename, 'w', encoding='utf-8') as html_file:
                 html_file.write(html_text)
